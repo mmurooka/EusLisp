@@ -103,6 +103,9 @@ left hand side of line a-b, and b lies at the right side of ac."
 Normal is vertical to both v1 and v2.
 v1, v2 and normal must be normalized in advance.
 Normal must be given if the sign of the angle is needed."
+    (if (or (equal normal (float-vector 0 0 0)) ;; for irteus
+            (equal normal (float-vector *nan* *nan* *nan*))) ;; for eus
+        (return-from vector-angle (if (>= (v. v1 v2) 0) 0.0 pi)))
     (atan (v.* normal v1 v2) (v. v1 v2)) )
 
 (defun face-normal-vector (vertices)
