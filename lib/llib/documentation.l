@@ -1,11 +1,13 @@
 ;;
 ;;
 
-(defun escape-string (str)
+(defun escape-string (str &key (docp nil))
   (let ((ret ""))
     (dotimes (i (length str))
       (cond ((eq (schar str i) #\")
              (setq ret (concatenate string ret "\'\'")))
+            (docp ;; break other escape in document string
+             (setq ret (concatenate string ret (format nil "~c" (schar str i)))))
             ((eq (schar str i) #\*)
              (setq ret (concatenate string ret "\\textasteriskcentered ")))
             ((eq (schar str i) #\<)
@@ -92,7 +94,7 @@
                    (setq doc-str (make-doc-string (documentation cls))))
                (case *output-format*
                      (:html
-                      (format t "~A" (escape-string (format nil "\\classdesc{~A}{~A}{~A}{~A}~%" (send cls :name) (send super :name) slots-str doc-str))))
+                      (format t "~A{~A}" (escape-string (format nil "\\classdesc{~A}{~A}{~A}~%" (send cls :name) (send super :name) slots-str)) (escape-string doc-str :docp t)))
                      (:md
                       (format t "### ~A~%- :super **~A**~%- :slots ~A~%~%~A~%~%" (send cls :name) (send super :name) slots-str doc-str)))
                ))
@@ -108,9 +110,9 @@
 		      (cond ((null doc)
 			     (format t "~A" (escape-string (format nil "\\metdesc{~A}{~A}{}~%" method args-str))))
 			    (*has-key*
-			     (format t "~A" (escape-string (format nil "\\longdescription{~A}{~A}{~A}~%" method args-str doc))))
+			     (format t "~A{~A}" (escape-string (format nil "\\longdescription{~A}{~A}~%" method args-str)) (escape-string doc :docp t)))
 			    (t
-			     (format t "~A" (escape-string (format nil "\\methoddesc{~A}{~A}{~A}~%" method args-str doc))))))
+			     (format t "~A{~A}" (escape-string (format nil "\\methoddesc{~A}{~A}~%" method args-str)) (escape-string doc :docp t)))))
                      (:md
                       (cond ((null doc)
 			     (format t "~A ~A~%~%" method args-str))
@@ -175,9 +177,9 @@
 	   (cond ((null doc)
 		  (format t "~A" (escape-string (format nil "\\fundesc{~A}{~A}~%" funcname args-str))))
 		 (*has-key*
-		  (format t "~A" (escape-string (format nil "\\longdescription{~A}{~A}{~A}~%" funcname args-str doc))))
+		  (format t "~A{~A}" (escape-string (format nil "\\longdescription{~A}{~A}~%" funcname args-str)) (escape-string doc :docp t)))
 		 (t
-		  (format t "~A" (escape-string (format nil "\\funcdesc{~A}{~A}{~A}~%" funcname args-str doc))))
+		  (format t "~A{~A}" (escape-string (format nil "\\funcdesc{~A}{~A}~%" funcname args-str)) (escape-string doc :docp t)))
 		 ))
 	  (:md
 	    (cond ((null doc)
