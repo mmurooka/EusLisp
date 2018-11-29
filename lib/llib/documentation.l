@@ -213,7 +213,10 @@
     (setf (symbol-function 'defmethod-org) (symbol-function 'defmethod)))
   (unless (fboundp 'defun-org)
     (setf (symbol-function 'defun-org) (symbol-function 'defun)))
-  (defmacro require (&rest args) (format *error-output* ";; skip require ~A ..." args))
+  (unless (fboundp 'load-org)
+    (setf (symbol-function 'load-org) (symbol-function 'load)))
+  (defmacro require (&rest args) (format *error-output* ";; skip require ~A ...~%" args))
+  (defun load (&rest args) (format *error-output* ";; skip load ~A ...~%" args))
   (defmacro defclass (cls &rest args &key element-type super slots documentation (doc documentation) &allow-other-keys)
     `(progn
        (defclass-org ,cls :super ,super :slots ,slots ,@args :doc ,doc)
@@ -236,7 +239,7 @@
          (if (and (documentation v) (derivedp (send v :func) compiled-code))
              (push `(make-function-document ',v nil) *funcdoc-public*))))
 
-  (load file)
+  (load-org file)
   (if output-filename
       (setq *standard-output* (open output-filename :direction :output)))
   (case *output-format*
