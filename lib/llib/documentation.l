@@ -89,7 +89,13 @@
 (defun write-classdesc (cls &optional (super (send cls :super)) (slots (cdr (coerce (send cls :slots) cons))))
              (let (slots-str (doc-str ""))
                (dolist (slot slots)
-                 (setq slots-str (concatenate string slots-str (format nil "~A " slot))))
+                 (case *output-format*
+                       (:html
+                        (setq slots-str (concatenate string slots-str (format nil "~A \\\\ \\hspace{30mm} \\>" slot))))
+                       (:md
+                        (setq slots-str (concatenate string slots-str (format nil "~A " slot)))
+                        ))
+                 )
                (if (documentation cls)
                    (setq doc-str (make-doc-string (documentation cls))))
                (case *output-format*
